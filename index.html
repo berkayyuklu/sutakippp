@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0ea5e9" />
+  <meta name="description" content="Günlük su tüketimini takip et, hedeflerine ulaş!" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="HydroTrack" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <title>HydroTrack – Su Takibi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="light">
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo">💧 HydroTrack</div>
+  <div class="header-actions">
+    <button class="icon-btn" id="settingsBtn" title="Ayarlar">⚙️</button>
+    <button class="icon-btn" id="themeBtn" title="Tema Değiştir">🌙</button>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main class="container">
+
+  <!-- GLASS VISUAL -->
+  <section class="glass-section">
+    <div class="glass-wrap">
+      <div class="glass-outer">
+        <div class="glass-liquid" id="glassLiquid">
+          <div class="liquid-surface"></div>
+          <div class="liquid-shine"></div>
+        </div>
+        <div class="glass-overlay"></div>
+        <div class="glass-percent" id="glassPercent">0%</div>
+      </div>
+      <div class="glass-labels">
+        <span class="label-goal" id="labelGoal">2500 ml</span>
+        <span class="label-zero">0</span>
+      </div>
+    </div>
+    <div class="intake-info">
+      <div class="intake-amount" id="intakeAmount">0 <span>ml</span></div>
+      <div class="intake-sub" id="intakeSub">Henüz su içmediniz. Hadi başlayalım! 🌊</div>
+    </div>
+    <button class="undo-btn" id="undoBtn" title="Son eklemeyi geri al">↩ Geri Al</button>
+  </section>
+
+  <!-- QUICK ADD BUTTONS -->
+  <section class="quick-section">
+    <div class="section-header">
+      <h2>Hızlı Ekle</h2>
+      <button class="text-btn" id="addCupBtn">+ Bardak Ekle</button>
+    </div>
+    <div class="cup-grid" id="cupGrid"></div>
+  </section>
+
+  <!-- BADGES -->
+  <section class="badge-section" id="badgeSection">
+    <h2>Rozetler</h2>
+    <div class="badge-grid" id="badgeGrid"></div>
+  </section>
+
+  <!-- STATS -->
+  <section class="stats-section">
+    <div class="section-header">
+      <h2>İstatistikler</h2>
+      <div class="tab-group">
+        <button class="tab active" data-tab="day">Gün</button>
+        <button class="tab" data-tab="week">Hafta</button>
+        <button class="tab" data-tab="month">Ay</button>
+      </div>
+    </div>
+    <div class="chart-wrap" id="chartWrap">
+      <canvas id="statsChart"></canvas>
+    </div>
+    <div class="stats-summary" id="statsSummary"></div>
+    <button class="danger-btn" id="resetBtn">🗑️ İstatistikleri Sıfırla</button>
+  </section>
+
+  <!-- BACKUP -->
+  <section class="backup-section">
+    <h2>Veri Yedekleme</h2>
+    <div class="backup-row">
+      <button class="outline-btn" id="exportBtn">⬇️ Dışa Aktar (JSON)</button>
+      <label class="outline-btn" for="importFile">⬆️ İçe Aktar</label>
+      <input type="file" id="importFile" accept=".json" style="display:none" />
+    </div>
+  </section>
+
+</main>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Ayarlar</h3>
+      <button class="close-btn" data-modal="settingsModal">✕</button>
+    </div>
+    <div class="modal-body">
+      <label class="field-label">Günlük Su Hedefi (ml)</label>
+      <input type="number" id="goalInput" class="field-input" min="500" max="10000" step="50" placeholder="2500" />
+      <button class="primary-btn" id="saveGoalBtn">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD CUP MODAL -->
+<div class="modal-overlay" id="addCupModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Yeni Bardak Ekle</h3>
+      <button class="close-btn" data-modal="addCupModal">✕</button>
+    </div>
+    <div class="modal-body">
+      <label class="field-label">Bardak Adı</label>
+      <input type="text" id="cupNameInput" class="field-input" placeholder="Büyük Kupa" />
+      <label class="field-label">Hacim (ml)</label>
+      <input type="number" id="cupMlInput" class="field-input" min="50" max="2000" step="10" placeholder="400" />
+      <button class="primary-btn" id="saveCupBtn">Ekle</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- BADGE POPUP -->
+<div class="badge-popup" id="badgePopup">
+  <div class="badge-popup-icon" id="badgePopupIcon"></div>
+  <div class="badge-popup-title" id="badgePopupTitle"></div>
+  <div class="badge-popup-desc" id="badgePopupDesc"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
